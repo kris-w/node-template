@@ -1,0 +1,11 @@
+###
+# POST Request to Log In a User
+###
+
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "testpassword"
+}
