@@ -40,7 +40,7 @@ function createJWT(account, source) {
   const tokenDecoded = {
     username: account.username,
     roles: account.roles,
-    aud: "mPersona-node",
+    aud: process.env.JWT_AUDIENCE,
     iss: source,
     nbf: Math.floor(Date.now() / 1000),
     jti: uuidv4(),
