@@ -24,6 +24,8 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error('Error connecting to MongoDB:', error);
     process.exit(1); // Exit the process if unable to connect to MongoDB
   });
+  
+  mongoose.set('strictQuery', false);
 
 // Middleware
 app.use(helmet());
