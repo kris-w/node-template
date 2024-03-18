@@ -27,7 +27,9 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173' // Replace with your Vue.js application's domain
+}));
 app.use(express.json());
 app.use(session({
     secret: process.env.SESSION_SECRET,

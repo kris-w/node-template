@@ -1,7 +1,8 @@
+require('dotenv').config(); // Import dotenv and load environment variables
+
 const jwt = require("jsonwebtoken");
 const uuidv4 = require("uuid").v4;
 
-// Middleware to verify if the user is authenticated
 const isAuthenticated = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
@@ -10,7 +11,7 @@ const isAuthenticated = (req, res, next) => {
       if (err) {
         return res.status(403).json({ message: "Invalid or expired token." });
       }
-      req.tokenDecoded = decodedToken; // Assign the decoded token to req.tokenDecoded
+      req.tokenDecoded = decodedToken;
       next();
     });
   } else {
@@ -18,7 +19,30 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
-// Middleware to renew the token if it's about to expire
+const authenticateAndDecode = (token) => {
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    return decodedToken;
+  } catch (err) {
+    return false;
+  }
+};
+
+const decodeValidToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (!err) {
+        req.tokenDecoded = decodedToken;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+};
+
 const renewToken = (req, res, next) => {
   const tokenDecoded = req.tokenDecoded;
   if (tokenDecoded) {
@@ -31,16 +55,15 @@ const renewToken = (req, res, next) => {
     }
     next();
   } else {
-    next(); // No user decoded, isAuthenticated middleware will handle it
+    next();
   }
 };
 
-// Function to create JWT
 function createJWT(account, source) {
   const tokenDecoded = {
     username: account.username,
     roles: account.roles,
-    aud: process.env.JWT_AUDIENCE,
+    aud: process.env.JWT_AUDIENCE, // Fetch from .env
     iss: source,
     nbf: Math.floor(Date.now() / 1000),
     jti: uuidv4(),
@@ -51,8 +74,7 @@ function createJWT(account, source) {
   return { token, tokenDecoded };
 }
 
-// Middleware to check if the user is an admin
-function isAdmin(req, res, next) {
+const isAdmin = (req, res, next) => {
   const roles = req.tokenDecoded?.roles || [];
   if (!roles.includes("admin")) {
     return res
@@ -60,11 +82,13 @@ function isAdmin(req, res, next) {
       .send({ message: "Access denied. Only admins can perform this action." });
   }
   next();
-}
+};
 
 module.exports = {
   isAuthenticated,
+  decodeValidToken,
   renewToken,
   createJWT,
   isAdmin,
+  authenticateAndDecode,
 };
