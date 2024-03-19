@@ -39,7 +39,8 @@ async function register(req, res, next) {
           email,
           password: hashedPassword,
           salt,
-          roles: roles || ['user'] // Assign default role if no roles are provided
+          roles: roles || ['user'], // Assign default role if no roles are provided
+          active: true // Mark the user as active by default
       });
 
       // Save the user to the database using promiseHandler
@@ -76,7 +77,7 @@ async function login(req, res) {
 
     // Find user by username
     const user = await User.findOne({ username });
-    if (!user) {
+    if (!user || !user.active) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 

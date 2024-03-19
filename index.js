@@ -50,8 +50,14 @@ app.use(limiter); // Apply rate limiting middleware
 
 // Routes
 const authRoutes = require('./src/routes/authenticationRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+
+// Apply authentication middleware for all routes under /api/admin
+app.use('/api/admin', authMiddleware.isAuthenticated, authMiddleware.isAdmin);
+
 //const otherRoutes = require('./src/routes/otherRoutes');
 app.use('/api/auth', authRoutes);
+app.use('/api/admin/users', userRoutes);
 //app.use('/api/other', authMiddleware.isAuthenticated, otherRoutes);
 
 // Error handling middleware should be placed after all other middleware
