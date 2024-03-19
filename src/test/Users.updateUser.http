@@ -1,0 +1,14 @@
+###
+# PUT Request to Update User
+###
+
+PUT http://localhost:3000/api/admin/users/65f9b0138ddf487c39c0d340
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imt3OTAiLCJyb2xlcyI6WyJ1c2VyIiwiYWRtaW4iLCJldGMiXSwiYXVkIjoibm9kZVRlbXBsYXRlIiwiaXNzIjoibG9naW4iLCJuYmYiOjE3MTA4NzY2NjQsImp0aSI6IjY0NWQ2N2ZiLTJlZmMtNDFlMC1iMmM1LWI3NmI0YzM4NDJkYiIsImlhdCI6MTcxMDg3NjY2NCwiZXhwIjoxNzEwODgwMjY0fQ.X3pijQS4BESiLsmr-43C9VHhKPqjyyQuVx1Twlw_dvo
+
+{
+  "username": "kw1",
+  "password": "password",
+  "email": "newemail@example.com",
+  "roles": ["user"]
+}
