@@ -6,6 +6,6 @@ POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "kw4",
+  "username": "kw90",
   "password": "password"
 }

@@ -54,6 +54,7 @@ const userRoutes = require('./src/routes/userRoutes');
 
 // Apply authentication middleware for all routes under /api/admin
 app.use('/api/admin', authMiddleware.isAuthenticated, authMiddleware.isAdmin);
+//app.use('/api/admin', authMiddleware.isAuthenticated);
 
 //const otherRoutes = require('./src/routes/otherRoutes');
 app.use('/api/auth', authRoutes);
