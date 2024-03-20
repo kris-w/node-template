@@ -5,14 +5,18 @@ const uuidv4 = require("uuid").v4;
 
 const isAuthenticated = (req, res, next) => {
   const authHeader = req.headers.authorization;
+
   if (authHeader) {
     const token = authHeader.split(" ")[1];
     jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
       if (err) {
         return res.status(403).json({ message: "Invalid or expired token." });
       }
-      req.tokenDecoded = decodedToken;
-      next();
+      // Renew token if necessary
+      renewToken(req, res, () => {
+        req.tokenDecoded = decodedToken;
+        next();
+      });
     });
   } else {
     res.sendStatus(401);
