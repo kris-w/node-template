@@ -24,6 +24,7 @@ const securityMiddleware = () => {
     helmet.contentSecurityPolicy(cspConfig),
     cors({
       origin: 'http://localhost:5173', // Replace with your Vue.js application's domain
+      exposedHeaders: ['Content-Length', 'Content-Type', 'auth-token', 'auth-token-decoded'] // Expose custom headers
     }),
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
