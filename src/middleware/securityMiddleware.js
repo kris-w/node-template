@@ -19,7 +19,7 @@ const securityMiddleware = () => {
     },
   };
 
-  return [
+  const middlewareStack = [
     helmetConfig,
     helmet.contentSecurityPolicy(cspConfig),
     cors({
@@ -31,6 +31,18 @@ const securityMiddleware = () => {
       message: 'Too many requests from this IP, please try again later.',
     }),
   ];
+
+  // Conditionally apply HSTS based on environment variable
+  const enableHSTS = process.env.ENABLE_HSTS === 'true';
+  if (enableHSTS) {
+    middlewareStack.unshift(helmet.hsts({
+      maxAge: 31536000, // 1 year in seconds
+      includeSubDomains: true,
+      preload: true,
+    }));
+  }
+
+  return middlewareStack;
 };
 
 module.exports = securityMiddleware;
