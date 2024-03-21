@@ -33,6 +33,24 @@ exports.getAllInactiveUsers = async (req, res) => {
     }
 };
 
+// Controller function to get a user by ID
+exports.getUserById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error getting user by ID:', error);
+        res.status(500).json({ error: 'An error occurred while getting the user by ID' });
+    }
+};
+
+
 // Controller function to get one user by username or email
 exports.getUserByUsernameOrEmail = async (req, res) => {
     try {
