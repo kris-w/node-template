@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const User = require('../models/User');
 
 // Controller function to get all users
@@ -74,6 +75,15 @@ exports.updateUser = async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
 
+        // Check if the password is being updated
+        if (updates.password) {
+            // Hash the new password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(updates.password, salt);
+            updates.password = hashedPassword;
+        }
+
+        // Find the user by ID and update
         const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
 
         if (!updatedUser) {
