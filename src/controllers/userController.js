@@ -73,7 +73,7 @@ exports.getUserByUsernameOrEmail = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = req.body;
+        let updates = req.body;
 
         // Check if the password is being updated
         if (updates.password) {
@@ -81,6 +81,11 @@ exports.updateUser = async (req, res) => {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(updates.password, salt);
             updates.password = hashedPassword;
+        }
+
+        // If roles are sent as a comma-separated string, convert them to an array
+        if (typeof updates.roles === 'string') {
+            updates.roles = updates.roles.split(',');
         }
 
         // Find the user by ID and update
@@ -96,6 +101,7 @@ exports.updateUser = async (req, res) => {
         res.status(500).json({ error: 'An error occurred while updating the user' });
     }
 };
+
 
 // Controller function to delete a user record
 exports.deleteUser = async (req, res) => {
