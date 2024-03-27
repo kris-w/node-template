@@ -4,9 +4,7 @@ const jwt = require("jsonwebtoken");
 const uuidv4 = require("uuid").v4;
 
 const isAuthenticated = (req, res, next) => {
-  console.log ("checking login..");
   const authHeader = req.headers.authorization;
-  console.log(authHeader);
   if (authHeader) {
     const token = authHeader.split(" ")[1];
     jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
