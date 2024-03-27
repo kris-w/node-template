@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const { createJWT } = require('../middleware/authenticationMiddleware');
-const promiseHandler = require("../error/promiseHandler");
+const promiseHandler = require("../middleware/promiseMiddleware");
 
 async function register(req, res, next) {
   try {

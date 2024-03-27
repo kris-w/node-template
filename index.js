@@ -3,10 +3,9 @@ const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const loggingMiddleware = require('./src/middleware/loggingMiddleware');
+const { logger, logWithMetadata } = require('./src/middleware/loggingMiddleware');
 const authMiddleware = require('./src/middleware/authenticationMiddleware');
 const securityMiddleware = require('./src/middleware/securityMiddleware'); // Updated import
-const errorHandlingMiddleware = require('./src/middleware/errorHandlingMiddleware');
 
 const app = express();
 
@@ -37,8 +36,15 @@ app.use(session({
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     }
   }));
-app.use(loggingMiddleware); // Logging middleware
+
 app.use(securityMiddleware()); // Updated usage of securityMiddleware
+
+// Custom request logging middleware using logWithMetadata
+app.use((req, res, next) => {
+  logWithMetadata(`${req.method} ${req.url}`, null, req); // Log request details with metadata
+  next(); // Call next middleware
+});
+
 // Routes
 const authRoutes = require('./src/routes/authenticationRoutes');
 const userRoutes = require('./src/routes/userRoutes');
@@ -48,9 +54,6 @@ app.use('/api/admin', authMiddleware.isAuthenticated, authMiddleware.isAdmin);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', userRoutes);
-
-// Error handling middleware should be placed after all other middleware
-app.use(errorHandlingMiddleware);
 
 // Start server
 const port = process.env.PORT || 3000;

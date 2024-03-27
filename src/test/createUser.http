@@ -6,9 +6,9 @@ POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
 {
-  "username": "kw90",
+  "username": "test3",
   "password": "password",
   "password2": "password",
-  "email": "kw7@example.com",
-  "roles": ["user","admin","etc"]
+  "email": "kwtest72d@example.com",
+  "roles": ["user","etc"]
 }
