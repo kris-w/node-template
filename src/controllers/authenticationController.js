@@ -1,8 +1,11 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const { createJWT } = require('../middleware/authenticationMiddleware');
 const promiseHandler = require("../middleware/promiseMiddleware");
+const sendEmail = require('../middleware/emailMiddleware.js');
 
 async function register(req, res, next) {
   try {
@@ -70,7 +73,6 @@ async function register(req, res, next) {
   }
 };
 
-
 async function login(req, res) {
   try {
     const { username, password } = req.body;
@@ -120,8 +122,82 @@ function logout(req, res) {
   });
 }
 
+// Function to initiate password reset
+async function requestPasswordReset(req, res) {
+  try {
+    const { usernameOrEmail } = req.body;
+
+    // Find user by username or email
+    const user = await User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] });
+    if (!user || !user.active) {
+      return res.status(404).json({ message: 'User not found or inactive' });
+    }
+
+    // Generate a unique reset token and store it in the database
+    const resetToken = generateResetToken();
+    user.resetToken = await bcrypt.hash(resetToken, 10);
+    user.resetTokenExpiration = Date.now() + 3600000; // 1 hour expiration
+    await user.save();
+
+    // Send password reset link to the user's email
+    sendPasswordResetEmail(user.email, resetToken);
+
+    res.status(200).json({ message: 'Password reset email sent successfully' });
+  } catch (error) {
+    console.error('Error initiating password reset:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
+// Function to handle password reset
+async function resetPassword(req, res) {
+  try {
+    const { resetToken, newPassword } = req.body;
+
+    // Find user by reset token
+    const user = await User.findOne({ resetToken });
+    if (!user || !user.active) {
+      return res.status(404).json({ message: 'Invalid reset token' });
+    }
+
+    // Check if reset token is expired
+    if (Date.now() > user.resetTokenExpiration) {
+      return res.status(401).json({ message: 'Reset token has expired' });
+    }
+
+    // Hash the new password and update user's password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
+// Function to generate a random reset token
+function generateResetToken() {
+  return crypto.randomBytes(20).toString('hex');
+}
+
+// Function to send password reset email
+function sendPasswordResetEmail(email, resetToken) {
+  const subject = 'Password Reset Request';
+  const text = `Hello,\n\nYou have requested a password reset. Please click on the following link to reset your password:\n\n${process.env.CLIENT_URL}/reset-password?token=${resetToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
+
+  sendEmail(email, subject, text)
+    .then(() => console.log('Password reset email sent successfully'))
+    .catch(error => console.error('Error sending password reset email:', error));
+}
+  
 module.exports = {
   register,
   login,
-  logout
+  logout,
+  requestPasswordReset,
+  resetPassword
 };
