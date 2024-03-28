@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated, renewToken, isAdmin } = require('../middleware/authenticationMiddleware');
-const { register, login, logout } = require('../controllers/authenticationController');
+const { register, login, logout, requestPasswordReset, resetPassword } = require('../controllers/authenticationController');
 
 // Route for user registration
 router.post('/register', register);
@@ -11,6 +11,12 @@ router.post('/login', login);
 
 // Logout route
 router.post('/logout', logout);
+
+// Route for requesting password reset
+router.post('/password/reset/request', requestPasswordReset);
+
+// Route for resetting password
+router.post('/password/reset', resetPassword);
 
 // Route for accessing a protected resource
 router.get('/protected', isAuthenticated, (req, res) => {
