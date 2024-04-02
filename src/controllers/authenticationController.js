@@ -132,7 +132,6 @@ async function requestPasswordReset(req, res) {
     if (!user || !user.active) {
       return res.status(404).json({ message: 'User not found or inactive' });
     }
-
     // Generate a unique reset token and store it in the database
     const resetToken = generateResetToken();
     user.resetToken = await bcrypt.hash(resetToken, 10);
@@ -187,8 +186,7 @@ function generateResetToken() {
 // Function to send password reset email
 function sendPasswordResetEmail(email, resetToken) {
   const subject = 'Password Reset Request';
-  const text = `Hello,\n\nYou have requested a password reset. Please click on the following link to reset your password:\n\n${process.env.CLIENT_URL}/reset-password?token=${resetToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
-
+  const text = `Hello,\n\nYou have requested a password reset. Please click on the following link to reset your password:\n\n${process.env.SITE_URL}/reset-password?token=${resetToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
   sendEmail(email, subject, text)
     .then(() => console.log('Password reset email sent successfully'))
     .catch(error => console.error('Error sending password reset email:', error));
