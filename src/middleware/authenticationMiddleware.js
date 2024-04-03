@@ -66,6 +66,7 @@ function createJWT(account, source) {
   const tokenDecoded = {
     username: account.username,
     roles: account.roles,
+    email: account.email,
     aud: process.env.JWT_AUDIENCE, // Fetch from .env
     iss: source,
     nbf: Math.floor(Date.now() / 1000),
