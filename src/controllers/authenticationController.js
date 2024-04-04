@@ -139,7 +139,7 @@ async function requestPasswordReset(req, res) {
     await user.save();
 
     // Send password reset link to the user's email
-    sendPasswordResetEmail(user.email, resetToken);
+    sendPasswordResetEmail(user.email, user.resetToken);
 
     res.status(200).json({ message: 'Password reset email sent successfully' });
   } catch (error) {
@@ -151,7 +151,7 @@ async function requestPasswordReset(req, res) {
 // Function to handle password reset
 async function resetPassword(req, res) {
   try {
-    const { resetToken, newPassword } = req.body;
+    const { resetToken, newPassword, confirmPassword } = req.body;
 
     // Find user by reset token
     const user = await User.findOne({ resetToken });
@@ -162,6 +162,11 @@ async function resetPassword(req, res) {
     // Check if reset token is expired
     if (Date.now() > user.resetTokenExpiration) {
       return res.status(401).json({ message: 'Reset token has expired' });
+    }
+
+    // Validate new password and confirm password
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
     }
 
     // Hash the new password and update user's password
@@ -178,6 +183,7 @@ async function resetPassword(req, res) {
   }
 }
 
+
 // Function to generate a random reset token
 function generateResetToken() {
   return crypto.randomBytes(20).toString('hex');
@@ -186,7 +192,7 @@ function generateResetToken() {
 // Function to send password reset email
 function sendPasswordResetEmail(email, resetToken) {
   const subject = 'Password Reset Request';
-  const text = `Hello,\n\nYou have requested a password reset. Please click on the following link to reset your password:\n\n${process.env.SITE_URL}/reset-password?token=${resetToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
+  const text = `Hello,\n\nYou have requested a password reset. Please click on the following link to reset your password:\n\n${process.env.SITE_URL}password/reset?token=${resetToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
   sendEmail(email, subject, text)
     .then(() => console.log('Password reset email sent successfully'))
     .catch(error => console.error('Error sending password reset email:', error));
