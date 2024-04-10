@@ -12,7 +12,6 @@
     "dependencies": {
         "bcrypt": "^5.1.1",
         "cors": "^2.8.5",
-        "crypto": "^1.0.1",
         "csurf": "^1.11.0",
         "dotenv": "^10.0.0",
         "express": "^4.18.2",
@@ -21,11 +20,12 @@
         "googleapis": "^134.0.0",
         "helmet": "^7.1.0",
         "jsonwebtoken": "^9.0.2",
-        "mongoose": "^6.12.6",
+        "mongodb": "^6.5.0",
+        "mongoose": "^8.3.1",
         "nodemailer": "^6.9.13",
         "nodemon": "^2.0.15",
         "uuid": "^9.0.1",
-        "winston": "^3.3.3",
+        "winston": "^3.13.0",
         "winston-mongodb": "^5.1.1"
     }
 }

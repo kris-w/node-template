@@ -13,6 +13,7 @@ const app = express();
 dotenv.config();
 
 // Connect to MongoDB
+mongoose.set('strictQuery', false);
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
@@ -21,8 +22,6 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error('Error connecting to MongoDB:', error);
     process.exit(1); // Exit the process if unable to connect to MongoDB
   });
-  
-mongoose.set('strictQuery', false);
 
 // Middleware
 app.use(express.json());

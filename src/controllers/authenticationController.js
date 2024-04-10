@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
+const { randomBytes } = require('crypto'); // Importing randomBytes from the built-in crypto module
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const { createJWT } = require('../middleware/authenticationMiddleware');
@@ -90,10 +90,6 @@ async function login(req, res) {
     }
 
     // Generate JWT token
-    //const { token, tokenDecoded } = createJWT(user, 'login');
-
-    //res.json({ token, user: tokenDecoded });
-
     const newToken = createJWT(user, 'login');
   
     // Send response with token
@@ -186,7 +182,7 @@ async function resetPassword(req, res) {
 
 // Function to generate a random reset token
 function generateResetToken() {
-  return crypto.randomBytes(20).toString('hex');
+  return randomBytes(20).toString('hex'); // Using randomBytes from the built-in crypto module
 }
 
 // Function to send password reset email
