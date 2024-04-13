@@ -1,10 +1,14 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const promiseHandler = require("../middleware/promiseMiddleware");
 
 // Controller function to get all users
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
+        const usersPromise = User.find();
+        const results = await promiseHandler(usersPromise, 5000);
+        const users = results.success;
+        
         res.json(users);
     } catch (error) {
         console.error('Error getting all users:', error);
@@ -15,7 +19,10 @@ exports.getAllUsers = async (req, res) => {
 // Controller function to get all active users
 exports.getAllActiveUsers = async (req, res) => {
     try {
-        const activeUsers = await User.find({ active: true });
+        const activeUsersPromise = User.find({ active: true });
+        const results = await promiseHandler(activeUsersPromise, 5000);
+        const activeUsers = results.success;
+        
         res.json(activeUsers);
     } catch (error) {
         console.error('Error getting all active users:', error);
@@ -26,7 +33,10 @@ exports.getAllActiveUsers = async (req, res) => {
 // Controller function to get all inactive users
 exports.getAllInactiveUsers = async (req, res) => {
     try {
-        const inactiveUsers = await User.find({ active: false });
+        const inactiveUsersPromise = User.find({ active: false });
+        const results = await promiseHandler(inactiveUsersPromise, 5000);
+        const inactiveUsers = results.success;
+        
         res.json(inactiveUsers);
     } catch (error) {
         console.error('Error getting all inactive users:', error);
@@ -38,7 +48,9 @@ exports.getAllInactiveUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findById(id);
+        const userPromise = User.findById(id);
+        const results = await promiseHandler(userPromise, 5000);
+        const user = results.success;
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -51,12 +63,13 @@ exports.getUserById = async (req, res) => {
     }
 };
 
-
 // Controller function to get one user by username or email
 exports.getUserByUsernameOrEmail = async (req, res) => {
     try {
         const { usernameOrEmail } = req.params;
-        const user = await User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] });
+        const userPromise = User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] });
+        const results = await promiseHandler(userPromise, 5000);
+        const user = results.success;
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -89,7 +102,9 @@ exports.updateUser = async (req, res) => {
         }
 
         // Find the user by ID and update
-        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
+        const updatedUserPromise = User.findByIdAndUpdate(id, updates, { new: true });
+        const results = await promiseHandler(updatedUserPromise, 5000);
+        const updatedUser = results.success;
 
         if (!updatedUser) {
             return res.status(404).json({ error: 'User not found' });
@@ -102,14 +117,14 @@ exports.updateUser = async (req, res) => {
     }
 };
 
-
 // Controller function to delete a user record
 exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedUser = await User.findByIdAndDelete(id);
+        const deletedUserPromise = User.findByIdAndDelete(id);
+        const results = await promiseHandler(deletedUserPromise, 5000);
 
-        if (!deletedUser) {
+        if (!results.success) {
             return res.status(404).json({ error: 'User not found' });
         }
 

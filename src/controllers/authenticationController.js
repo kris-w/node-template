@@ -150,7 +150,10 @@ async function resetPassword(req, res) {
     const { resetToken, newPassword, confirmPassword } = req.body;
 
     // Find user by reset token
-    const user = await User.findOne({ resetToken });
+    const userPromise = User.findOne({ resetToken });
+    const results = await promiseHandler(userPromise, 5000);
+    const user = results.success;
+
     if (!user || !user.active) {
       return res.status(404).json({ message: 'Invalid reset token' });
     }
@@ -170,15 +173,20 @@ async function resetPassword(req, res) {
     user.password = hashedPassword;
     user.resetToken = undefined;
     user.resetTokenExpiration = undefined;
-    await user.save();
 
-    res.status(200).json({ message: 'Password reset successfully' });
+    const saveUserPromise = user.save();
+    const saveResults = await promiseHandler(saveUserPromise, 5000);
+
+    if (saveResults.success) {
+      res.status(200).json({ message: 'Password reset successfully' });
+    } else {
+      res.status(500).json({ message: 'Failed to reset password' });
+    }
   } catch (error) {
     console.error('Error resetting password:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
-
 
 // Function to generate a random reset token
 function generateResetToken() {
