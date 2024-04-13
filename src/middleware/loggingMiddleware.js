@@ -33,10 +33,12 @@ const logger = winston.createLogger({
 });
 
 // Function to log messages with additional metadata and optional log level
-function logWithMetadata(message, user = null, request = null, level = 'info') {
+function logWithMetadata(message, request = null, level = 'info') {
+    const username = request && request.tokenDecoded ? request.tokenDecoded.username : null;
     // Additional metadata to include in log messages
+    console.log(username);
     const metadata = {
-        user: sanitizeUser(user),
+        user: username,
         request: sanitizeRequest(request)
     };
 
@@ -45,13 +47,13 @@ function logWithMetadata(message, user = null, request = null, level = 'info') {
 }
 
 // Function to sanitize user information before logging
-function sanitizeUser(user) {
+/*function sanitizeUser(user) {
     if (!user) return null;
 
     // Remove sensitive information from user object
     const sanitizedUser = { username: user.username }; // Retain only non-sensitive user data
     return sanitizedUser;
-}
+}*/
 
 // Function to sanitize request information before logging
 function sanitizeRequest(request) {

@@ -35,12 +35,14 @@ app.use(session({
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     }
   }));
+app.use(securityMiddleware()); 
 
-app.use(securityMiddleware()); // Updated usage of securityMiddleware
+// Decode valid token middleware
+app.use(authMiddleware.decodeValidToken);
 
 // Custom request logging middleware using logWithMetadata
 app.use((req, res, next) => {
-  logWithMetadata(`${req.method} ${req.url}`, null, req); // Log request details with metadata
+  logWithMetadata(`${req.method} ${req.url}`, req); // Log request details with metadata
   next(); // Call next middleware
 });
 
