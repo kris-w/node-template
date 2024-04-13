@@ -32,6 +32,7 @@ app.use(session({
     cookie: {
       name: process.env.SESSION_COOKIE_NAME,
       secure: false, // recommended true for HTTPS
+      httpOnly: true, // Set to true to prevent client-side access to the cookie
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     }
   }));
