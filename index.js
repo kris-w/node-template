@@ -43,7 +43,7 @@ app.use(authMiddleware.decodeValidToken);
 
 // Custom request logging middleware using logWithMetadata
 app.use((req, res, next) => {
-  logWithMetadata(`${req.method} ${req.url}`, req); // Log request details with metadata
+  logWithMetadata(`${req.method} ${req.url}`, req, 'info', 'user'); // Log request details with metadata
   next(); // Call next middleware
 });
 

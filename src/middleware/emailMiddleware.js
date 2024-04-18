@@ -1,5 +1,6 @@
 // Assuming you have a library like nodemailer installed
 const nodemailer = require('nodemailer');
+const { logWithMetadata } = require('./loggingMiddleware');
 
 // Middleware function to send emails
 async function sendEmail(to, subject, text) {
@@ -26,9 +27,11 @@ async function sendEmail(to, subject, text) {
     // Send the email
     await transporter.sendMail(mailOptions);
 
-    console.log('Email sent successfully');
+    // Log email sent successfully
+    logWithMetadata('Email sent successfully', null, 'info', 'system');
   } catch (error) {
-    console.error('Error sending email:', error);
+    // Log error sending email
+    logWithMetadata('Error sending email', { error }, 'error', 'system');
     throw new Error('Failed to send email');
   }
 }

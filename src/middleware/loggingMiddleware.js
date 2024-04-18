@@ -1,3 +1,5 @@
+// loggingMiddleware.js
+
 const dotenv = require('dotenv');
 const winston = require('winston');
 const winstonMongoDB = require('winston-mongodb');
@@ -33,13 +35,14 @@ const logger = winston.createLogger({
 });
 
 // Function to log messages with additional metadata and optional log level
-function logWithMetadata(message, request = null, level = 'info') {
+function logWithMetadata(message, request = null, level = 'info', type = 'user') {
     const username = request && request.tokenDecoded ? request.tokenDecoded.username : null;
     // Additional metadata to include in log messages
     console.log(username);
     const metadata = {
         user: username,
-        request: sanitizeRequest(request)
+        request: sanitizeRequest(request),
+        type: type // Add a new field to indicate the type of activity
     };
 
     // Log the message with metadata using the specified log level
@@ -68,26 +71,10 @@ function sanitizeRequest(request) {
 
     // Optionally log request body for POST and PUT requests
     if (request.method === 'POST' || request.method === 'PUT') {
-        sanitizedRequest.body = sanitizeRequestBody(request.body);
+        sanitizedRequest.body = request.body;
     }
 
     return sanitizedRequest;
-}
-
-function sanitizeRequestBody(body) {
-    if (!body) return null;
-
-    // Clone the body object to avoid modifying the original
-    const sanitizedBody = { ...body };
-
-    // Replace sensitive fields (e.g., password) with asterisks
-    if (sanitizedBody.password) {
-        sanitizedBody.password = '****';
-    }
-
-    // Add additional sensitive fields to sanitize if needed
-
-    return sanitizedBody;
 }
 
 module.exports = { logger, logWithMetadata };
