@@ -68,10 +68,26 @@ function sanitizeRequest(request) {
 
     // Optionally log request body for POST and PUT requests
     if (request.method === 'POST' || request.method === 'PUT') {
-        sanitizedRequest.body = request.body;
+        sanitizedRequest.body = sanitizeRequestBody(request.body);
     }
 
     return sanitizedRequest;
+}
+
+function sanitizeRequestBody(body) {
+    if (!body) return null;
+
+    // Clone the body object to avoid modifying the original
+    const sanitizedBody = { ...body };
+
+    // Replace sensitive fields (e.g., password) with asterisks
+    if (sanitizedBody.password) {
+        sanitizedBody.password = '****';
+    }
+
+    // Add additional sensitive fields to sanitize if needed
+
+    return sanitizedBody;
 }
 
 module.exports = { logger, logWithMetadata };
