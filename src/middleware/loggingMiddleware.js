@@ -38,7 +38,6 @@ const logger = winston.createLogger({
 function logWithMetadata(message, request = null, level = 'info', type = 'user') {
     const username = request && request.tokenDecoded ? request.tokenDecoded.username : null;
     // Additional metadata to include in log messages
-    console.log(username);
     const metadata = {
         user: username,
         request: sanitizeRequest(request),

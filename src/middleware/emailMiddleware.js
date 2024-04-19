@@ -1,8 +1,7 @@
-// Assuming you have a library like nodemailer installed
 const nodemailer = require('nodemailer');
+const handlePromise = require('../middleware/promiseMiddleware');
 const { logWithMetadata } = require('./loggingMiddleware');
 
-// Middleware function to send emails
 async function sendEmail(to, subject, text) {
   try {
     // Create a transporter object using nodemailer
@@ -24,14 +23,22 @@ async function sendEmail(to, subject, text) {
       text
     };
 
-    // Send the email
-    await transporter.sendMail(mailOptions);
+    // Send the email and handle the promise with the promise middleware
+    const results = await handlePromise(transporter.sendMail(mailOptions));
 
-    // Log email sent successfully
-    logWithMetadata('Email sent successfully', null, 'info', 'system');
+    // Check if the email was sent successfully
+    if (results.success) {
+      // Log email sent successfully
+      logWithMetadata('Email sent successfully', null, 'info', 'system');
+      return { success: true };
+    } else {
+      // Log error sending email
+      logWithMetadata(`Error sending email: ${results.failure}`, null, 'error', 'system');
+      return { success: false, error: results.failure };
+    }
   } catch (error) {
     // Log error sending email
-    logWithMetadata('Error sending email', { error }, 'error', 'system');
+    llogWithMetadata(`Error sending email: ${error}`, null, 'error', 'system');
     throw new Error('Failed to send email');
   }
 }

@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const { createJWT } = require('../middleware/authenticationMiddleware');
 const promiseHandler = require("../middleware/promiseMiddleware");
+const { logWithMetadata } = require('../middleware/loggingMiddleware');
 const sendEmail = require('../middleware/emailMiddleware.js');
 
 async function register(req, res, next) {
@@ -126,6 +127,7 @@ async function requestPasswordReset(req, res) {
     // Find user by username or email
     const user = await User.findOne({ $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }] });
     if (!user || !user.active) {
+      logWithMetadata(`User not found or inactive for search criteria: ${usernameOrEmail}`, req, 'info', 'system');
       return res.status(404).json({ message: 'User not found or inactive' });
     }
     // Generate a unique reset token and store it in the database
@@ -133,16 +135,27 @@ async function requestPasswordReset(req, res) {
     user.resetToken = await bcrypt.hash(resetToken, 10);
     user.resetTokenExpiration = Date.now() + 3600000; // 1 hour expiration
     await user.save();
-
     // Send password reset link to the user's email
-    sendPasswordResetEmail(user.email, user.resetToken);
+    const subject = 'Password Reset Request';
+    const text = `Hello,\n\nYou have requested a password reset. Please click on the following link to reset your password:\n\n${process.env.SITE_URL}password/reset?token=${resetToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
 
-    res.status(200).json({ message: 'Password reset email sent successfully' });
+    // Send the email and handle the response
+    const emailResults = await sendEmail(user.email, subject, text);
+    if (emailResults.success) {
+      logWithMetadata('Password reset email sent successfully', req, 'info', 'system');
+      res.status(200).json({ message: 'Password reset email sent successfully' });
+    } else {
+      logWithMetadata(`Error sending password reset email ${error}`, req, 'error', 'system');
+      res.status(500).json({ message: 'Failed to send password reset email' });
+    }
   } catch (error) {
-    console.error('Error initiating password reset:', error);
+    logWithMetadata(`Error initiating password reset ${error}`, req, 'error', 'system');
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+
+
+
 
 // Function to handle password reset
 async function resetPassword(req, res) {
@@ -191,15 +204,6 @@ async function resetPassword(req, res) {
 // Function to generate a random reset token
 function generateResetToken() {
   return randomBytes(20).toString('hex'); // Using randomBytes from the built-in crypto module
-}
-
-// Function to send password reset email
-function sendPasswordResetEmail(email, resetToken) {
-  const subject = 'Password Reset Request';
-  const text = `Hello,\n\nYou have requested a password reset. Please click on the following link to reset your password:\n\n${process.env.SITE_URL}password/reset?token=${resetToken}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
-  sendEmail(email, subject, text)
-    .then(() => console.log('Password reset email sent successfully'))
-    .catch(error => console.error('Error sending password reset email:', error));
 }
   
 module.exports = {
