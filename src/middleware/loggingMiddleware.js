@@ -65,15 +65,36 @@ function sanitizeRequest(request) {
     const sanitizedRequest = {
         method: request.method,
         url: request.url,
-        // Omit headers and body for privacy reasons
+        // Omit headers for privacy reasons
     };
 
     // Optionally log request body for POST and PUT requests
     if (request.method === 'POST' || request.method === 'PUT') {
-        sanitizedRequest.body = request.body;
+        sanitizedRequest.body = sanitizeRequestBody(request.body);
     }
 
     return sanitizedRequest;
+}
+
+// Function to sanitize request body
+function sanitizeRequestBody(body) {
+    if (!body) return null;
+
+    // Clone the body object to avoid modifying the original
+    const sanitizedBody = { ...body };
+
+    // Replace sensitive fields (e.g., password) with asterisks
+    if (sanitizedBody.password) {
+        sanitizedBody.password = '****';
+    }
+
+    if (sanitizedBody.password2) {
+        sanitizedBody.password2 = '****';
+    }
+
+    // Add additional sensitive fields to sanitize if needed
+
+    return sanitizedBody;
 }
 
 module.exports = { logger, logWithMetadata };
