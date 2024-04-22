@@ -38,7 +38,7 @@ async function sendEmail(to, subject, text) {
     }
   } catch (error) {
     // Log error sending email
-    llogWithMetadata(`Error sending email: ${error}`, null, 'error', 'system');
+    logWithMetadata(`Error sending email: ${error}`, null, 'error', 'system');
     throw new Error('Failed to send email');
   }
 }
