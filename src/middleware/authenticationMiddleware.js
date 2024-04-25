@@ -64,6 +64,7 @@ const renewToken = (req, res, next) => {
 
 function createJWT(account, source) {
   const tokenDecoded = {
+    id: account._id,
     username: account.username,
     roles: account.roles,
     email: account.email,
