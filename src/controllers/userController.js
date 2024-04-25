@@ -13,6 +13,8 @@ const messages = {
   errorGettingUserByUsernameOrEmail: 'An error occurred while getting the user',
   errorUpdatingUser: 'An error occurred while updating the user',
   errorDeletingUser: 'An error occurred while deleting the user',
+  errorDoNotDeleteSelf: 'You cannot delete your own account',
+  messageUserDeleted: 'User deleted successfully',
 };
 
 exports.getAllUsers = async (req, res) => {
@@ -130,6 +132,14 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const userRequestingDelete = req.tokenDecoded.id;
+
+    // Check if the user is attempting to delete their own account
+    if (id === userRequestingDelete) {
+      return res.status(403).json({ error: messages.errorDoNotDeleteSelf });
+    }
+
+    // Proceed with deleting the user
     const deletedUserPromise = User.findByIdAndDelete(id);
     const results = await promiseHandler(deletedUserPromise, 5000);
 
@@ -138,9 +148,10 @@ exports.deleteUser = async (req, res) => {
       return res.status(404).json({ error: messages.userNotFound });
     }
 
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: messages.messageUserDeleted });
   } catch (error) {
     logWithMetadata(messages.errorDeletingUser, req, 'error', 'system');
     res.status(500).json({ error: messages.internalServerError });
   }
 };
+
